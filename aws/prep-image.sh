@@ -3,7 +3,6 @@ set -e
 set -x
 set -o pipefail
 
-goversion=1.16.11
 nodeversion=17.1.0
 
 cd "/home/ubuntu"
@@ -13,13 +12,6 @@ sudo apt-get install -y --no-install-recommends net-tools awscli nginx
 sudo ufw allow 'Nginx Full'
 sudo systemctl enable nginx.service
 sudo systemctl start nginx.service
-
-
-cd /usr/local
-sudo wget --no-verbose https://go.dev/dl/go$goversion.linux-amd64.tar.gz -O golang.tgz
-echo aa22d0e2be68c0a7027a64e76cbb2869332fbc42ce14e3d10b69007b51030775 golang.tgz | sha256sum --check --strict -
-sudo tar xf golang.tgz
-sudo rm golang.tgz
 
 cd /usr/
 sudo apt-get remove -y nodejs npm
