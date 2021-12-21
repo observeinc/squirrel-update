@@ -54,6 +54,7 @@ function parseUpdateRequest(pieces) {
 }
 
 function serveUpdateRequest(ur, req, res) {
+    console.log('serveUpdateRequest', ur);
     const osver = ur && versions[ur.os];
     const osarch = osver && osver[ur.arch];
     if (!osarch || !osarch.length) {
@@ -99,6 +100,7 @@ function parseDownloadRequest(pieces) {
 }
 
 function serveDownloadRequest(dr, req, res) {
+    console.log('serveDownloadRequest', dr);
     const osver = dr && versions[dr.os];
     const osarch = osver && osver[dr.arch];
     if (!osarch || !osarch.length) {
@@ -106,7 +108,7 @@ function serveDownloadRequest(dr, req, res) {
         notFound(req, res);
         return;
     }
-    let served = osarch[0].version;
+    let served = osarch[0];
     if (dr.version !== 'latest') {
         //  find the specific version
         dr.version = semver.coerce(dr.version);

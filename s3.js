@@ -1,6 +1,7 @@
 'use strict';
 
 const { S3Client, GetObjectCommand, ListObjectsV2Command } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 //  For now, up to 1000 release binaries are supported.
 //  Once we have more than that many versions, we will have
@@ -27,6 +28,7 @@ function listBucketPath(bucket, path, region) {
 const reFilecomp = /\/([^\/"\\:]*)$/;
 
 function serveBinaryFile(req, res, region, bucket, key) {
+    console.log('serveBinaryFile', region, bucket, key);
     const client = new S3Client({
         region: region
     });
@@ -34,6 +36,31 @@ function serveBinaryFile(req, res, region, bucket, key) {
         Bucket: bucket,
         Key: key
     });
+    return getSignedUrl(client, command, { expiresIn: 3600*4 })
+        .then((url) => {
+            console.log(new Date(), `redirect to ${url}`);
+            //  temporary redirect, always use GET
+            res.writeHead(303, {
+                'Location': url
+            });
+            res.end();
+        })
+        .catch((err) => {
+            const text = `Could not pre-sign URL: ${err}`;
+            console.error(new Date(), text);
+            res.writeHead(500, {
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify({
+                success: true,
+                error: text
+            }));
+        });
+
+    /*
+     * to stream out all the data as a proxy, uncomment this code
+     *
+
     return client.send(command).then((resp) => {
         //  resp.Body is the data
         if (!resp.Body) {
@@ -61,7 +88,11 @@ function serveBinaryFile(req, res, region, bucket, key) {
             error: `${err}`
         }));
     });
+
+     *
+     */
 }
+
 
 exports.listBucketPath = listBucketPath;
 exports.serveBinaryFile = serveBinaryFile;
