@@ -46,6 +46,9 @@ sudo systemctl restart nginx
 
 sudo certbot renew --dry-run -n -c /etc/letsencrypt/cli.ini
 
+#  vanta needs binutils
+sudo apt install binutils || true
+sudo apt --fix-broken install
 sudo wget https://vanta-agent.s3.amazonaws.com/v1.5.9/vanta.deb
 sudo dpkg -i vanta.deb
 sudo /var/vanta/vanta-cli register --secret "$(aws secretsmanager --region=us-west-2 get-secret-value --secret-id vanta-server-agent | jq -r .SecretString | jq -r .vanta_key)"
