@@ -14,27 +14,31 @@ function listBucketPath(bucket, path, region) {
         Bucket: bucket,
         Prefix: path + '/'
     });
-    return client.send(command).then((resp) => {
-        const ret = [];
-        if (resp.Contents) {
-            resp.Contents.forEach((el) => {
-                ret.push(el.Key);
-            });
-        }
-        return ret;
-    });
+    return client.send(command)
+        .then((resp) => {
+            const ret = [];
+            if (resp.Contents) {
+                resp.Contents.forEach((el) => {
+                    ret.push(el.Key);
+                });
+            }
+            return ret;
+        });
 }
 
 const reFilecomp = /\/([^\/"\\:]*)$/;
 
-function serveBinaryFile(req, res, region, bucket, key) {
+function serveBinaryFile(res, region, bucket, key) {
     console.log('serveBinaryFile', region, bucket, key);
+    const fn = reFilecomp.exec(key)[1];
     const client = new S3Client({
         region: region
     });
     const command = new GetObjectCommand({
         Bucket: bucket,
-        Key: key
+        Key: key,
+        ResponseContentDisposition: `attachment; filename="${fn}"`,
+        ResponseContentType: 'application/octet-string'
     });
     return getSignedUrl(client, command, { expiresIn: 3600*4 })
         .then((url) => {
@@ -58,7 +62,8 @@ function serveBinaryFile(req, res, region, bucket, key) {
         });
 
     /*
-     * to stream out all the data as a proxy, uncomment this code
+     * To stream out all the data as a proxy, uncomment this code.
+     * This works as a node service, but not as a lambda.
      *
 
     return client.send(command).then((resp) => {
@@ -72,7 +77,6 @@ function serveBinaryFile(req, res, region, bucket, key) {
             }));
         } else {
             return new Promise((resolve, reject) => {
-                const fn = reFilecomp.exec(key)[1];
                 res.writeHead(200, {
                     'Content-Type': 'application/octet-stream',
                     'Content-Disposition': `attachment; filename="${fn}"`
