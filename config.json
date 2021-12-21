@@ -1,0 +1,6 @@
+{
+    "s3bucket": "observe-sandbox-public",
+    "s3path": "release",
+    "s3region": "us-west-2",
+    "port": 8080
+}
