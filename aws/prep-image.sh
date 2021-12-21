@@ -41,5 +41,5 @@ sudo systemctl enable squirrel-update.service
 sudo systemctl start squirrel-update.service
 sudo cp aws/system-update.cron /etc/cron.weekly/
 
-sudo cp nginx.conf /etc/nginx/sites-enabled/default
+sudo cp aws/nginx.conf /etc/nginx/sites-enabled/default
 sudo systemctl restart nginx
