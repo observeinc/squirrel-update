@@ -205,9 +205,9 @@ function loadBucketVersions() {
                 } else if (isDownloadWin32) {
                     setFile(osver, isDownloadWin32, 'downloadPath', fn);
                 } else if (isUpdateDarwin) {
-                    setFile(osver, isUpdateWin32, 'updatePath', fn);
+                    setFile(osver, isUpdateDarwin, 'updatePath', fn);
                 } else if (isDownloadDarwin) {
-                    setFile(osver, isDownloadWin32, 'downloadPath', fn);
+                    setFile(osver, isDownloadDarwin, 'downloadPath', fn);
                 } else {
                     console.log(new Date(), `Don't know what to do with ${fn}`);
                 }
