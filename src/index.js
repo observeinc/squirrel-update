@@ -47,7 +47,7 @@ handler.loadBucketVersions()
     .then(() => {
         //  re-load new versions once an hour
         setInterval(() => {
-            loadBucketVersions()
+            handler.loadBucketVersions()
                 .then(()=>{})
                 .catch((err) => {
                     console.error(`error reloading bucket releases: ${err}`);

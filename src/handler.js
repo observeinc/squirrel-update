@@ -16,6 +16,7 @@ function dispatchUrl(url, res) {
     if (url === '/') {
         return serveFile("index.html", res);
     }
+    url = /[^?]*/.exec(url)[0];
     const pieces = url.split(/\//);
     pieces.shift();
     const updateRequest = parseUpdateRequest(pieces);
@@ -141,11 +142,6 @@ function serveDownloadRequest(dr, res) {
     return s3.serveBinaryFile(res, config.s3region, config.s3bucket, served.downloadPath);
 }
 
-//  os, arch, version, filename
-const reReleases = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(RELEASES)/;
-const reUpdate = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(.*\.nupkg)/;
-const reDownload = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(.*\.exe)/;
-
 function setFile(osver, pieces, key, fn) {
     let o = osver[pieces[1]];
     if (!o) {
@@ -179,6 +175,13 @@ function sortVersion(a, b) {
     return 0;
 }
 
+//  os, arch, version, filename
+const reReleases = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(RELEASES)/;
+const reUpdate = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(.*\.nupkg)/;
+const reDownload = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(.*\.exe)/;
+const reUpdateDarwin = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(.*\.zip)/;
+const reDownloadDarwin = /release\/([^\/]*)\/([^\/]*)\/([^\/]*)\/(.*\.dmg)/;
+
 //  Given file names in S3, figure out what they mean.
 //  The convention is that the files live in the bucket under
 //  a key named releases/(os)/(arch)/(version)
@@ -193,11 +196,17 @@ function loadBucketVersions() {
                 const isReleasesWin32 = reReleases.exec(fn);
                 const isUpdateWin32 = reUpdate.exec(fn);
                 const isDownloadWin32 = reDownload.exec(fn);
+                const isUpdateDarwin = reUpdateDarwin.exec(fn);
+                const isDownloadDarwin = reDownloadDarwin.exec(fn);
                 if (isReleasesWin32) {
                     setFile(osver, isReleasesWin32, 'RELEASES', fn);
                 } else if (isUpdateWin32) {
                     setFile(osver, isUpdateWin32, 'updatePath', fn);
                 } else if (isDownloadWin32) {
+                    setFile(osver, isDownloadWin32, 'downloadPath', fn);
+                } else if (isUpdateDarwin) {
+                    setFile(osver, isUpdateWin32, 'updatePath', fn);
+                } else if (isDownloadDarwin) {
                     setFile(osver, isDownloadWin32, 'downloadPath', fn);
                 } else {
                     console.log(new Date(), `Don't know what to do with ${fn}`);
