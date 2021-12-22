@@ -95,7 +95,8 @@ function serveUpdateRequest(ur, res) {
                 console.log(new Date(), `done serving ${osarch[0].os}/${osarch[0].arch}/${osarch[0].version}/RELEASES`);
             });
     }
-    if (!semver.gt(osarch[0].version, ur.curVersion)) {
+    console.log(`osarch[0].version=${osarch[0].version} ur.curVersion=${ur.curVersion}`);
+    if (!semver.gt(osarch[0].version || '0', ur.curVersion || '0')) {
         return new Promise((resolve, reject) => {
             res.writeHead(204, { 'Content-Type': 'application/octet-stream' });
             res.end();
@@ -132,7 +133,7 @@ function serveDownloadRequest(dr, res) {
     let served = osarch[0];
     if (dr.version !== 'latest') {
         //  find the specific version
-        dr.version = semver.coerce(dr.version);
+        dr.version = semver.coerce(dr.version || '0');
         served = null;
         osarch.forEach((ver) => {
             if (ver.version == dr.version) {
@@ -172,10 +173,10 @@ function setFile(osver, pieces, key, fn) {
 }
 
 function sortVersion(a, b) {
-    if (semver.gt(a, b)) {
+    if (semver.gt(a.version, b.version)) {
         return -1;
     }
-    if (semver.lt(a, b)) {
+    if (semver.lt(a.version, b.version)) {
         return 1;
     }
     return 0;
