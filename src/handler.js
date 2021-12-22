@@ -16,6 +16,12 @@ function dispatchUrl(url, res) {
     if (url === '/') {
         return serveFile("index.html", res);
     }
+    if (url == '/robots.txt') {
+        return serveFile("robots.txt", res);
+    }
+    if (url == '/favicon.ico') {
+        return serveFile("favicon.ico", res);
+    }
     url = /[^?]*/.exec(url)[0];
     const pieces = url.split(/\//);
     pieces.shift();

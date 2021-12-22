@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /download/
+Disallow: /update/
+Disallow: /download/*
+Disallow: /update/*
+
+User-agent: Googlebot
+User-agent: AdsBot-Google
+Disallow: /download/
+Disallow: /update/
+Disallow: /download/*
+Disallow: /update/*
