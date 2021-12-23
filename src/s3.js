@@ -27,26 +27,43 @@ function listBucketPath(bucket, path, region) {
 }
 
 const reFilecomp = /\/([^\/"\\:]*)$/;
+const reZip = /\.zip$/;
 
-function serveBinaryFile(res, region, bucket, key) {
+function contentTypeFromKey(key) {
+    if (key.match(reZip)) {
+        return 'application/zip';
+    }
+    return 'application/octet-stream';
+}
+
+function serveBinaryFile(res, region, bucket, key, flavor) {
     console.log('serveBinaryFile', region, bucket, key);
     const fn = reFilecomp.exec(key)[1];
     const client = new S3Client({
         region: region
     });
+    const contentType = contentTypeFromKey(key);
     const command = new GetObjectCommand({
         Bucket: bucket,
         Key: key,
         ResponseContentDisposition: `attachment; filename="${fn}"`,
-        ResponseContentType: 'application/octet-string'
+        ResponseContentType: contentType
     });
     return getSignedUrl(client, command, { expiresIn: 3600*4 })
         .then((url) => {
-            console.log(new Date(), `redirect to ${url}`);
-            //  temporary redirect, always use GET
-            res.writeHead(303, {
-                'Location': url
-            });
+            console.log(new Date(), `redirect to ${flavor} of ${contentType} at ${url}`);
+            if (flavor !== undefined && flavor === 'darwin') {
+                res.writeHead(200, { 'content-type': 'application/json' });
+                res.write(JSON.stringify({
+                    "url": url,
+                    "name": key
+                }));
+            } else {
+                //  temporary redirect, always use GET
+                res.writeHead(303, {
+                    'Location': url
+                });
+            }
             res.end();
         })
         .catch((err) => {

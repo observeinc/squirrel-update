@@ -90,7 +90,7 @@ function serveUpdateRequest(ur, res) {
         return notFound(res);
     }
     if (ur.aux === 'RELEASES') {
-        return s3.serveBinaryFile(res, config.s3region, config.s3bucket, osarch[0].RELEASES)
+        return s3.serveBinaryFile(res, config.s3region, config.s3bucket, osarch[0].RELEASES, ur.os)
             .then(() => {
                 console.log(new Date(), `done serving ${osarch[0].os}/${osarch[0].arch}/${osarch[0].version}/RELEASES`);
             });
@@ -104,7 +104,7 @@ function serveUpdateRequest(ur, res) {
         });
     }
     console.log(new Date(), `serving update version ${osarch[0].version} to ${ur.os}/${ur.arch}`);
-    return s3.serveBinaryFile(res, config.s3region, config.s3bucket, osarch[0].updatePath)
+    return s3.serveBinaryFile(res, config.s3region, config.s3bucket, osarch[0].updatePath, ur.os)
         .then(() => {
             console.log(new Date(), `done update version ${osarch[0].version} to ${ur.os}/${ur.arch}`);
         });
@@ -146,7 +146,7 @@ function serveDownloadRequest(dr, res) {
         }
     }
     console.log(new Date(), `serving download version ${served.version} to ${dr.os}/${dr.arch}`);
-    return s3.serveBinaryFile(res, config.s3region, config.s3bucket, served.downloadPath);
+    return s3.serveBinaryFile(res, config.s3region, config.s3bucket, served.downloadPath, 'download');
 }
 
 function setFile(osver, pieces, key, fn) {
